@@ -8,6 +8,17 @@ d3.json(queryUrl).then(function(data) {
   console.log(data.features);
 });
 
+function getColor(d) {
+  return d > 1000 ? '#800026' :
+         d > 500  ? '#BD0026' :
+         d > 200  ? '#E31A1C' :
+         d > 100  ? '#FC4E2A' :
+         d > 50   ? '#FD8D3C' :
+         d > 20   ? '#FEB24C' :
+         d > 10   ? '#FED976' :
+                    '#FFEDA0';
+}
+
 function createFeatures(earthquakeData) {
   // console.log(earthquakeData);
   // Define a function we want to run once for each feature in the features array
@@ -18,35 +29,35 @@ function createFeatures(earthquakeData) {
         "</p><p>Magnitude: " + feature.properties.mag + 
         "</p><p>Depth: " + feature.geometry.coordinates[2] + "</p>"
       );
-  }
+  }  
   
   // Define a function to make the markers for each feature, setting options for size and color based on 
   // magnitude and depth.
   function pointToLayer(feature, latlng) {
-    var fillcolor = "";
-    // console.log(feature.geometry.coordinates[2]);
-    if (feature.geometry.coordinates[2] < 10) {
-      fillcolor = "#333ED4";
-    }
-    else if (feature.geometry.coordinates[2] < 30) {
-      fillcolor = "#2FA236";
-    }
-    else if (feature.geometry.coordinates[2] < 50) {
-      fillcolor = "#A0D636";
-    }
-    else if (feature.geometry.coordinates[2] < 70) {
-      fillcolor = "#EEDE04";
-    }
-    else if (feature.geometry.coordinates[2] < 90) {
-      fillcolor = "#F76915";
-    }
-    else {
-      fillcolor = "#FD0100";
-    }
+    // var fillcolor = "";
+    // // console.log(feature.geometry.coordinates[2]);
+    // if (feature.geometry.coordinates[2] < 10) {
+    //   fillcolor = "#333ED4";
+    // }
+    // else if (feature.geometry.coordinates[2] < 30) {
+    //   fillcolor = "#2FA236";
+    // }
+    // else if (feature.geometry.coordinates[2] < 50) {
+    //   fillcolor = "#A0D636";
+    // }
+    // else if (feature.geometry.coordinates[2] < 70) {
+    //   fillcolor = "#EEDE04";
+    // }
+    // else if (feature.geometry.coordinates[2] < 90) {
+    //   fillcolor = "#F76915";
+    // }
+    // else {
+    //   fillcolor = "#FD0100";
+    // }
 
     var geojsonMarkerOptions = {
       radius: feature.properties.mag**2,
-      fillColor: fillcolor,
+      fillColor: getColor(feature.geometry.coordinates[2]),
       color: "#000",
       weight: 1,
       opacity: 1,
@@ -113,33 +124,27 @@ function createMap(earthquakes) {
   L.control.layers(baseMaps, overlayMaps, {
     collapsed: false
   }).addTo(myMap);
+
+  //create a legend
+var legend = L.control({position: 'bottomright'});
+
+legend.onAdd = function (map) {
+
+    var div = L.DomUtil.create('div', 'info legend'),
+        grades = [0, 10, 20, 50, 100, 200, 500, 1000],
+        labels = [];
+
+    // loop through our density intervals and generate a label with a colored square for each interval
+    for (var i = 0; i < grades.length; i++) {
+        div.innerHTML +=
+            '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+            grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+    }
+
+    return div;
+};
+
+legend.addTo(myMap);
 }
 
 
-// // Loop through the cities array and create one marker for each city object
-// for (var i = 0; i < countries.length; i++) {
-
-//   // Conditionals for countries points
-//   var color = "";
-//   if (countries[i].points > 200) {
-//     color = "yellow";
-//   }
-//   else if (countries[i].points > 100) {
-//     color = "blue";
-//   }
-//   else if (countries[i].points > 90) {
-//     color = "green";
-//   }
-//   else {
-//     color = "red";
-//   }
-
-//   // Add circles to map
-//   L.circle(countries[i].location, {
-//     fillOpacity: 0.75,
-//     color: "white",
-//     fillColor: color,
-//     // Adjust radius
-//     radius: countries[i].points * 1500
-//   }).bindPopup("<h1>" + countries[i].name + "</h1> <hr> <h3>Points: " + countries[i].points + "</h3>").addTo(myMap);
-// }
