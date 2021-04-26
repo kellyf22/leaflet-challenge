@@ -5,21 +5,42 @@ var queryUrl = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_we
 d3.json(queryUrl).then(function(data) {
   // Once we get a response, send the data.features object to the createFeatures function
   createFeatures(data.features);
+  console.log(data.features);
 });
 
 function createFeatures(earthquakeData) {
-
+  // console.log(earthquakeData);
   // Define a function we want to run once for each feature in the features array
   // Give each feature a popup describing the place and time of the earthquake
   function onEachFeature(feature, layer) {
-    layer.bindPopup("<h3>" + feature.properties.place +
-      "</h3><hr><p>" + new Date(feature.properties.time) + "</p>");
+      layer.bindPopup("<h3>" + feature.properties.place +
+        "</h3><hr><p>" + new Date(feature.properties.time) + 
+        "</p><p>Magnitude: " + feature.properties.mag + 
+        "</p><p>Depth: " + feature.geometry.coordinates[2] + "</p>"
+      );
   }
+  
+  function pointToLayer(feature, latlng) {
+    var geojsonMarkerOptions = {
+      radius: feature.properties.mag**2,
+      fillColor: "#ff7800",
+      color: "#000",
+      weight: 1,
+      opacity: 1,
+      fillOpacity: 0.8
+    };
+    return L.circleMarker(latlng, geojsonMarkerOptions);
+  }
+  
 
   // Create a GeoJSON layer containing the features array on the earthquakeData object
   // Run the onEachFeature function once for each piece of data in the array
   var earthquakes = L.geoJSON(earthquakeData, {
-    onEachFeature: onEachFeature
+    onEachFeature: onEachFeature,
+    // pointToLayer: function (feature, latlng) {
+    //   return L.circleMarker(latlng, geojsonMarkerOptions);
+    // }
+    pointToLayer: pointToLayer
   });
 
   // Sending our earthquakes layer to the createMap function
